@@ -2,7 +2,7 @@
 
 namespace Itransition_task6.Controllers
 {
-    public class HomeController : Controller
+    public class CircuitController : Controller
     {
         public IActionResult Index()
         {
