@@ -1,5 +1,5 @@
 # Stage 1: Build & Publish
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0-preview AS build
 WORKDIR /src
 
 # Install Node.js
@@ -21,7 +21,7 @@ RUN npx tailwindcss -i ./wwwroot/css/site.css -o ./wwwroot/css/app.css
 RUN dotnet publish "Itransition_task6.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 # Stage 2: Runtime Environment
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-preview AS final
 WORKDIR /app
 
 EXPOSE 8080
