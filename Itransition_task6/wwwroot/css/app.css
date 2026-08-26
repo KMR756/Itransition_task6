@@ -1080,6 +1080,9 @@
       border-color: color-mix(in oklab, var(--color-white) 70%, transparent);
     }
   }
+  .bg-\[\#0D1629\] {
+    background-color: #0D1629;
+  }
   .bg-\[\#615FFF\] {
     background-color: #615FFF;
   }
