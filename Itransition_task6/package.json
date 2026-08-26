@@ -1,14 +1,10 @@
 {
   "name": "itransition_task6",
   "version": "1.0.0",
-  "main": "index.js",
+  "private": true,
   "scripts": {
-    "css": "npx @tailwindcss/cli -i ./wwwroot/css/app.css -o ./wwwroot/css/site.css --watch"
+    "css": "tailwindcss -i ./wwwroot/css/site.css -o ./wwwroot/css/app.css --watch"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "dependencies": {
     "@microsoft/signalr": "^10.0.11",
     "@tailwindcss/cli": "^4.3.3",

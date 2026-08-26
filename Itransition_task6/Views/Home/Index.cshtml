@@ -1,195 +1,104 @@
 ﻿@{
     ViewData["Title"] = "Dashboard";
-
-    var displayName =
-        Context.Session.GetString("DisplayName");
+    var displayName = Context.Session.GetString("DisplayName");
 }
 
-<div class="min-h-screen bg-slate-950">
+<div class="flex h-screen w-full flex-col overflow-hidden bg-slate-950 text-slate-100 font-sans">
 
-    <header class="border-b border-slate-800">
-
-        <div class="mx-auto flex max-w-7xl
-            items-center justify-between
-            px-6 py-5">
-
+    <!-- Header -->
+    <header class="h-16 shrink-0 border-b border-slate-800/80 bg-slate-900/90 px-6 backdrop-blur-md">
+        <div class="mx-auto flex h-full max-w-7xl items-center justify-between">
             <div class="flex items-center gap-3">
-
-                <div class="flex h-10 w-10
-                    items-center justify-center
-                    rounded-xl bg-indigo-500
-                    font-bold">
-                    CF
+                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#615FFF] font-bold text-white shadow-lg shadow-indigo-500/20">
+                    MA
                 </div>
-
                 <div>
-                    <div class="font-semibold">
-                        CircuitFlow
-                    </div>
-
-                    <div class="text-xs text-slate-500">
-                        Collaborative logic workspace
-                    </div>
+                    <div class="font-semibold text-slate-100 leading-tight">MyApp</div>
+                    <div class="text-xs text-slate-400">Collaborative logic workspace</div>
                 </div>
-
             </div>
 
             <div class="flex items-center gap-4">
-
                 <div class="text-sm text-slate-400">
-                    <span class="text-slate-200">
-                        @displayName
-                    </span>
+                    <span class="font-medium text-slate-200">@displayName</span>
                 </div>
-
-                <form asp-action="Logout"
-                      method="post">
-
-                    <button class="rounded-lg border
-                        border-slate-700
-                        px-3 py-2 text-sm
-                        text-slate-400
-                        hover:bg-slate-800">
-
-                        Leave
+                <form asp-action="Logout" method="post" class="m-0">
+                    <button type="submit" class="rounded-lg border border-slate-700/80 bg-[#615FFF] shadow-lg shadow-indigo-500/20 px-3 py-1.5 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white">
+                        Logout
                     </button>
-
                 </form>
-
             </div>
-
         </div>
-
     </header>
 
-
-    <main class="mx-auto max-w-7xl px-6 py-10">
-
-        <div class="mb-10 flex items-end
-            justify-between">
-
-            <div>
-                <p class="text-sm text-indigo-400">
-                    Workspace
-                </p>
-
-                <h1 class="mt-2 text-4xl font-bold">
-                    Your circuits
-                </h1>
-
-                <p class="mt-2 text-slate-400">
-                    Create a circuit or join an existing
-                    collaboration.
-                </p>
+    <!-- Centered Workspace Area -->
+    <div class="flex flex-1 items-center justify-center p-6 min-h-0 overflow-y-auto">
+        <main class="w-full max-w-7xl rounded-2xl bg-[#C6D2FF] p-8 text-slate-900 shadow-2xl">
+            <div class="mb-8 flex items-end justify-between">
+                <div>
+                    <p class="text-sm font-semibold text-[#615FFF]">Workspace</p>
+                    <h1 class="mt-1 text-4xl font-bold tracking-tight text-[#615FFF]">Your circuits</h1>
+                    <p class="mt-1 text-slate-600">Create a circuit or join an existing collaboration.</p>
+                </div>
+                <button type="button"
+                        onclick="openCreateModal()"
+                        class="rounded-xl bg-[#615FFF] px-5 py-3 font-semibold text-white shadow-md transition hover:bg-indigo-500 active:scale-95">
+                    + New circuit
+                </button>
             </div>
 
-            <button onclick="openCreateModal()"
-                    class="rounded-xl bg-indigo-500
-                px-5 py-3 font-semibold
-                hover:bg-indigo-400">
-
-                + New circuit
-            </button>
-
-        </div>
-
-
-        <div id="circuits"
-             class="grid gap-5
-            sm:grid-cols-2
-            lg:grid-cols-3">
-        </div>
-
-    </main>
+            <div id="circuits" class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                <!-- Circuit Cards JS Target -->
+            </div>
+        </main>
+    </div>
 
 </div>
 
-
-<div id="createModal"
-     class="fixed inset-0 z-50 hidden
-    items-center justify-center
-    bg-black/70 px-6">
-
-    <div class="w-full max-w-lg
-        rounded-3xl border border-slate-800
-        bg-slate-900 p-7">
-
+<!-- Modal Dialog -->
+<div id="createModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 px-6 backdrop-blur-sm">
+    <div class="w-full max-w-lg rounded-3xl border border-slate-800 bg-slate-900 p-7 text-slate-100 shadow-2xl">
         <div class="mb-6">
-            <h2 class="text-xl font-bold">
-                Create circuit
-            </h2>
-
-            <p class="mt-1 text-sm text-slate-400">
-                Start a new collaborative workspace.
-            </p>
+            <h2 class="text-xl font-bold text-white">Create circuit</h2>
+            <p class="mt-1 text-sm text-slate-400">Start a new collaborative workspace.</p>
         </div>
 
         <input id="circuitName"
+               type="text"
                placeholder="Circuit name"
-               class="mb-3 w-full rounded-xl
-        border border-slate-700
-        bg-slate-950
-        px-4 py-3 outline-none
-        focus:border-indigo-500" />
+               class="mb-3 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-indigo-500 transition" />
 
         <textarea id="circuitDescription"
                   placeholder="Description"
                   rows="3"
-                  class="w-full rounded-xl
-        border border-slate-700
-        bg-slate-950
-        px-4 py-3 outline-none
-        focus:border-indigo-500">
-    </textarea>
+                  class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-indigo-500 transition"></textarea>
 
-    <div class="mt-4">
+        <div class="mt-4">
+            <label for="gridSize" class="text-sm text-slate-400">Grid size</label>
+            <select id="gridSize"
+                    class="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-indigo-500 transition">
+                <option value="10">10 px</option>
+                <option value="20" selected>20 px</option>
+                <option value="30">30 px</option>
+                <option value="40">40 px</option>
+            </select>
+        </div>
 
-        <label class="text-sm text-slate-400">
-            Grid size
-        </label>
-
-        <select id="gridSize"
-                class="mt-2 w-full rounded-xl
-            border border-slate-700
-            bg-slate-950
-            px-4 py-3">
-
-            <option value="10">10 px</option>
-            <option value="20" selected>20 px</option>
-            <option value="30">30 px</option>
-            <option value="40">40 px</option>
-
-        </select>
-
+        <div class="mt-7 flex justify-end gap-3">
+            <button type="button"
+                    onclick="closeCreateModal()"
+                    class="rounded-xl px-4 py-2 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition">
+                Cancel
+            </button>
+            <button type="button"
+                    onclick="createCircuit()"
+                    class="rounded-xl bg-[#615FFF] px-5 py-2 font-semibold text-white hover:bg-indigo-400 transition">
+                Create
+            </button>
+        </div>
     </div>
-
-    <div class="mt-7 flex justify-end gap-3">
-
-        <button onclick="closeCreateModal()"
-                class="rounded-xl px-4 py-2
-            text-slate-400
-            hover:bg-slate-800">
-
-            Cancel
-        </button>
-
-        <button onclick="createCircuit()"
-                class="rounded-xl bg-indigo-500
-            px-5 py-2 font-semibold
-            hover:bg-indigo-400">
-
-            Create
-
-        </button>
-
-    </div>
-
-</div>
-
 </div>
 
 @section Scripts {
-
-    <script src="~/js/dashboard.js"></script>
-
+    <script src="~/js/dashboard.js" asp-append-version="true"></script>
 }
