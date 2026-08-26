@@ -80,7 +80,7 @@ async function loadCircuits() {
 
             </div>
 
-            <h3 class="mt-5 font-semibold">
+            <h3 class="mt-5 text-white font-semibold">
                 ${escapeHtml(circuit.name)}
             </h3>
 
@@ -110,11 +110,11 @@ async function loadCircuits() {
 
             <a href="/Circuit/Editor?id=${circuit.id}"
                class="mt-5 block rounded-xl
-                      bg-slate-800 px-4 py-3
+                      bg-[#615FFF] px-4 py-3
                       text-center text-sm
                       font-medium
                       transition
-                      group-hover:bg-indigo-500">
+                      group-hover:bg-indigo-500 text-white">
 
                 Open workspace →
             </a>
