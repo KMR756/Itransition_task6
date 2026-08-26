@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "css": "tailwindcss -i ./wwwroot/css/site.css -o ./wwwroot/css/app.css --watch"
+    "css": "tailwindcss -i ./wwwroot/css/site.css -o ./wwwroot/css/app.css --watch",
+    "build:css": "tailwindcss -i ./wwwroot/css/site.css -o ./wwwroot/css/app.css"
   },
   "dependencies": {
     "@microsoft/signalr": "^10.0.11",
