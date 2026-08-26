@@ -1,5 +1,150 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model Itransition_task6.Models.Circuit
+
 @{
+    ViewData["Title"] = Model.Name;
+}
+
+<div class="flex h-screen flex-col overflow-hidden bg-slate-950">
+
+  
+    <header class="flex h-16 shrink-0 items-center justify-between border-b border-slate-800 bg-slate-900 px-5">
+        <div class="flex items-center gap-4">
+            <a href="/" class="text-slate-500 hover:text-white">←</a>
+            <div>
+                <h1 class="font-semibold text-slate-100">@Model.Name</h1>
+                <div class="flex items-center gap-2 text-xs text-slate-500">
+                    <span id="connectionStatus" class="h-2 w-2 rounded-full bg-amber-400 animate-pulse"></span>
+                    <span id="connectionText">Connecting...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <div id="collaborators" class="flex -space-x-2"></div>
+            <button class="rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-300 hover:bg-slate-800">
+                Share
+            </button>
+        </div>
+    </header>
+
+  
+    <div class="flex min-h-0 flex-1">
+
+        
+        <aside class="w-64 shrink-0 border-r border-slate-800 bg-slate-900 p-4 overflow-y-auto">
+            <p class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                Tools
+            </p>
+            <div class="space-y-2 mb-6">
+                <button data-node-type="Wire" class="tool-button flex w-full items-center gap-2 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200 hover:bg-slate-800">
+                    <span>⚡</span> Connect Wire
+                </button>
+            </div>
+
+            <p class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                Components
+            </p>
+
+            <div class="space-y-2">
+                <button data-node-type="Input" class="tool-button flex w-full items-center gap-2 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200 hover:bg-slate-800">
+                    <span>→</span> Input
+                </button>
+                <button data-node-type="Output" class="tool-button flex w-full items-center gap-2 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200 hover:bg-slate-800">
+                    <span>○</span> Output
+                </button>
+                <button data-node-type="And" class="tool-button flex w-full items-center gap-2 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200 hover:bg-slate-800">
+                    <span>∧</span> AND
+                </button>
+                <button data-node-type="Or" class="tool-button flex w-full items-center gap-2 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200 hover:bg-slate-800">
+                    <span>≥1</span> OR
+                </button>
+                <button data-node-type="Not" class="tool-button flex w-full items-center gap-2 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200 hover:bg-slate-800">
+                    <span>¬</span> NOT
+                </button>
+                <button data-node-type="Xor" class="tool-button flex w-full items-center gap-2 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200 hover:bg-slate-800">
+                    <span>⊕</span> XOR
+                </button>
+                <button data-node-type="Nor" class="tool-button flex w-full items-center gap-2 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200 hover:bg-slate-800">
+                    <span>⊽</span> NOR
+                </button>
+                <button data-node-type="Nand" class="tool-button flex w-full items-center gap-2 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200 hover:bg-slate-800">
+                    <span>⊼</span> NAND
+                </button>
+            </div>
+
+            <div class="mt-8 border-t border-slate-800 pt-5">
+                <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Shortcuts & Tips</p>
+                <ul class="mt-3 space-y-2 text-xs text-slate-400">
+                    <li>• <strong>Alt + Click:</strong> Toggle Input (0/1)</li>
+                    <li>• <strong>Double Click Node/Wire:</strong> Delete</li>
+                    <li>• Drag components to move</li>
+                    <li>• Real-time synchronization active</li>
+                </ul>
+            </div>
+        </aside>
+
+       
+        <main id="workspace" class="relative min-w-0 flex-1 overflow-hidden bg-slate-950">
+            <svg id="circuitCanvas" class="absolute inset-0 h-full w-full">
+                <defs>
+                    <pattern id="gridPattern" width="@Model.GridSize" height="@Model.GridSize" patternUnits="userSpaceOnUse">
+                        <path d="M @Model.GridSize 0 L 0 0 0 @Model.GridSize" fill="none" stroke="#1e293b" stroke-width="1" />
+                    </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#gridPattern)"></rect>
+                <g id="wiresLayer"></g>
+                <g id="nodesLayer"></g>
+            </svg>
+        </main>
+
+        
+        <aside class="w-64 shrink-0 border-l border-slate-800 bg-slate-900 p-5">
+            <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Circuit</p>
+
+            <div class="mt-5">
+                <label for="gridSizeSelect" class="text-sm text-slate-400">Grid size</label>
+                <select id="gridSizeSelect" class="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <option value="10px">10px</option>
+                    <option value="20px" selected>20px</option>
+                    <option value="30px">30px</option>
+                    <option value="40px">40px</option>
+                </select>
+            </div>
+
+            <div class="mt-8 space-y-3">
+                <button id="runCircuitBtn" class="w-full rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-indigo-500 flex items-center justify-center gap-2">
+                    <span>▶</span> Run circuit
+                </button>
+                <button id="truthTableBtn" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-slate-200 transition hover:bg-slate-800">
+                    Truth table
+                </button>
+            </div>
+        </aside>
+
+    </div>
+</div>
+
+
+<div id="truthTableModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
+    <div class="bg-slate-900 border border-slate-700 rounded-xl p-6 max-w-3xl w-full max-h-[85vh] overflow-hidden flex flex-col shadow-2xl">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
+            <h3 class="text-lg font-bold text-slate-100">Circuit Truth Table</h3>
+            <button id="closeTruthTable" class="text-slate-400 hover:text-white text-2xl font-bold leading-none">&times;</button>
+        </div>
+        <div id="truthTableContent" class="overflow-auto flex-1 text-slate-200"></div>
+    </div>
+</div>
+
+@section Scripts {
+   
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+
+    
+    <script>
+        window.CIRCUIT_ID = "@Model.Id";
+        window.CIRCUIT_GRID_SIZE = @Model.GridSize;
+    </script>
+
+    
+    <script src="~/js/circuit-editor.js" asp-append-version="true"></script>
 }

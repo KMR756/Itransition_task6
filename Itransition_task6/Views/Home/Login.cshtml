@@ -1,5 +1,66 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model Itransition_task6.ViewModels.LoginViewModel
+
 @{
+    ViewData["Title"] = "Welcome";
 }
+
+<div class="min-h-screen flex items-center justify-center
+    bg-indigo-950 px-6">
+
+    <div class="w-full max-w-md">
+
+        <div class="mb-10 text-center">
+
+            
+
+            <h1 class="text-3xl font-bold tracking-tight">
+                Welcome to MyApp
+            </h1>
+
+            
+
+        </div>
+
+        <form asp-action="Login"
+              method="post"
+              class="rounded-3xl border border-slate-800
+            bg-slate-900/80 p-7 shadow-2xl">
+
+            @Html.AntiForgeryToken()
+
+            <label class="text-sm font-medium text-slate-300">
+               Enter Your name
+            </label>
+
+            <input asp-for="Name"
+            autocomplete="off"
+            class="mt-2 w-full rounded-xl
+            border border-slate-700
+            bg-slate-950
+            px-4 py-3
+            text-white
+            outline-none
+           " />
+
+            <span asp-validation-for="Name"
+                  class="text-sm text-red-400">
+            </span>
+
+            <button type="submit"
+                    class="mt-6 w-full rounded-xl
+                bg-indigo-500 px-4 py-3
+                font-semibold
+                transition
+                hover:bg-indigo-400
+                active:scale-[0.99]">
+
+                Enter 
+            </button>
+
+        </form>
+
+        
+
+    </div>
+
+</div>

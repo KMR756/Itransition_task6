@@ -1,12 +1,33 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿
+using Itransition_task6.Data;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
-namespace Itransition_task6.Controllers
+namespace CircuitFlow.Controllers;
+
+public class CircuitController : Controller
 {
-    public class CircuitController : Controller
+    private readonly AppDbContext _db;
+
+    public CircuitController(AppDbContext db)
     {
-        public IActionResult Index()
-        {
-            return View();
-        }
+        _db = db;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Editor(Guid id)
+    {
+        var circuit = await _db.Circuits
+            .Include(x => x.Nodes)
+            .Include(x => x.Wires)
+            .FirstOrDefaultAsync(x => x.Id == id);
+
+        if (circuit == null)
+            return NotFound();
+
+        ViewBag.DisplayName =
+            HttpContext.Session.GetString("DisplayName");
+
+        return View(circuit);
     }
 }
