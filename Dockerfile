@@ -1,27 +1,27 @@
-# Multi-stage build for .NET Core + Node.js
+# Use .NET SDK for building
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copy csproj and restore dependencies
+# Copy csproj file and restore dependencies
 COPY ["Itransition_task6/Itransition_task6.csproj", "Itransition_task6/"]
 RUN dotnet restore "Itransition_task6/Itransition_task6.csproj"
 
-# Copy everything else and build
+# Copy everything else
 COPY Itransition_task6/ Itransition_task6/
-WORKDIR "/src/Itransition_task6"
 
-# Install Node.js and npm (for client-side dependencies)
+# Install Node.js (since you have package.json and node_modules)
 RUN apt-get update && apt-get install -y \
     curl \
     && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-# Install npm dependencies (if package.json exists)
+# Install npm dependencies
+WORKDIR "/src/Itransition_task6"
 COPY package*.json ./
-RUN if [ -f "package.json" ]; then npm ci || npm install; fi
+RUN npm ci || npm install
 
-# Build the .NET application
+# Build the application
 RUN dotnet build "Itransition_task6.csproj" -c Release -o /app/build
 
 # Publish the application
@@ -35,10 +35,10 @@ WORKDIR /app
 # Copy published files
 COPY --from=publish /app/publish .
 
-# Copy node_modules if they exist
+# Copy node_modules if needed for runtime
 COPY --from=build /src/Itransition_task6/node_modules ./node_modules 2>/dev/null || true
 
-# Set environment variable
+# Set environment variables
 ENV ASPNETCORE_ENVIRONMENT=Production
 ENV ASPNETCORE_URLS=http://+:8080
 
