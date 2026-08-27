@@ -8,23 +8,31 @@ RUN apt-get update && apt-get install -y curl gnupg && \
     apt-get install -y nodejs && \
     rm -rf /var/lib/apt/lists/*
 
+# Move into project directory to align with package.json location
+WORKDIR /src/Itransition_task6
+
 # Restore NPM packages
 COPY package*.json ./
 RUN npm ci
 
-# Restore .NET packages (includes MailKit)
-COPY Itransition_Task4/Itransition_Task4.csproj Itransition_Task4/
-RUN dotnet restore Itransition_Task4/Itransition_Task4.csproj
+# Move back to root for solution-level restores
+WORKDIR /src
+
+# Restore .NET packages
+COPY Itransition_task6/Itransition_task6.csproj Itransition_task6/
+RUN dotnet restore Itransition_task6/Itransition_task6.csproj
 
 # Copy remaining source code
 COPY . .
 
+# Move to project folder for asset compilation and compilation
+WORKDIR /src/Itransition_task6
+
 # Compile Tailwind CSS output into wwwroot
-RUN npx @tailwindcss/cli -i ./Itransition_Task4/Styles/input.css -o ./Itransition_Task4/wwwroot/css/site.css
+RUN npx @tailwindcss/cli -i ./wwwroot/css/site.css -o ./wwwroot/css/app.css
 
 # Publish compiled ASP.NET Core binaries
-WORKDIR /src/Itransition_Task4
-RUN dotnet publish Itransition_Task4.csproj -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish Itransition_task6.csproj -c Release -o /app/publish /p:UseAppHost=false
 
 # Step 2: Lightweight Runtime Container
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
@@ -36,4 +44,4 @@ ENV DOTNET_USE_POLLING_FILE_WATCHER=true
 ENV ASPNETCORE_URLS=http://+:8080
 EXPOSE 8080
 
-ENTRYPOINT ["dotnet", "Itransition_Task6.dll"]
+ENTRYPOINT ["dotnet", "Itransition_task6.dll"]
