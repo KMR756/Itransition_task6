@@ -1,36 +1,39 @@
-# Stage 1: Build & Publish
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+# Step 1: Build .NET App + Tailwind CSS
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-# Install Node.js and Linux build tools for native binaries (lightningcss)
-RUN apt-get update && apt-get install -y curl build-essential python3 && \
+# Install Node.js for Tailwind CLI
+RUN apt-get update && apt-get install -y curl gnupg && \
     curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
-    apt-get install -y nodejs
+    apt-get install -y nodejs && \
+    rm -rf /var/lib/apt/lists/*
 
-# Copy project file and restore .NET dependencies
-COPY ["Itransition_task6/Itransition_task6.csproj", "Itransition_task6/"]
-RUN dotnet restore "Itransition_task6/Itransition_task6.csproj"
+# Restore NPM packages
+COPY package*.json ./
+RUN npm ci
 
-# Copy full repository source
+# Restore .NET packages (includes MailKit)
+COPY Itransition_Task4/Itransition_Task4.csproj Itransition_Task4/
+RUN dotnet restore Itransition_Task4/Itransition_Task4.csproj
+
+# Copy remaining source code
 COPY . .
 
-# Move into inner project directory
-WORKDIR "/src/Itransition_task6"
+# Compile Tailwind CSS output into wwwroot
+RUN npx @tailwindcss/cli -i ./Itransition_Task4/Styles/input.css -o ./Itransition_Task4/wwwroot/css/site.css
 
-# Clean install node modules & build CSS statically
-RUN npm ci || npm install
-RUN npm run build:css
+# Publish compiled ASP.NET Core binaries
+WORKDIR /src/Itransition_Task4
+RUN dotnet publish Itransition_Task4.csproj -c Release -o /app/publish /p:UseAppHost=false
 
-# Publish .NET Release build
-RUN dotnet publish "Itransition_task6.csproj" -c Release -o /app/publish /p:UseAppHost=false
-
-# Stage 2: Production Runtime
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
+# Step 2: Lightweight Runtime Container
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
-
-EXPOSE 8080
-ENV ASPNETCORE_URLS=http://+:8080
-ENV ASPNETCORE_ENVIRONMENT=Production
-
 COPY --from=build /app/publish .
-ENTRYPOINT ["dotnet", "Itransition_task6.dll"]
+
+# Fix for Render inotify limits & bind port
+ENV DOTNET_USE_POLLING_FILE_WATCHER=true
+ENV ASPNETCORE_URLS=http://+:8080
+EXPOSE 8080
+
+ENTRYPOINT ["dotnet", "Itransition_Task6.dll"]
