@@ -8,15 +8,9 @@ RUN apt-get update && apt-get install -y curl gnupg && \
     apt-get install -y nodejs && \
     rm -rf /var/lib/apt/lists/*
 
-# Move into project directory to align with package.json location
-WORKDIR /src/Itransition_task6
-
-# Restore NPM packages
+# Restore NPM packages from root directory
 COPY package*.json ./
 RUN npm ci
-
-# Move back to root for solution-level restores
-WORKDIR /src
 
 # Restore .NET packages
 COPY Itransition_task6/Itransition_task6.csproj Itransition_task6/
@@ -25,13 +19,11 @@ RUN dotnet restore Itransition_task6/Itransition_task6.csproj
 # Copy remaining source code
 COPY . .
 
-# Move to project folder for asset compilation and compilation
-WORKDIR /src/Itransition_task6
-
 # Compile Tailwind CSS output into wwwroot
-RUN npx @tailwindcss/cli -i ./wwwroot/css/site.css -o ./wwwroot/css/app.css
+RUN npx @tailwindcss/cli -i ./Itransition_task6/wwwroot/css/site.css -o ./Itransition_task6/wwwroot/css/app.css
 
 # Publish compiled ASP.NET Core binaries
+WORKDIR /src/Itransition_task6
 RUN dotnet publish Itransition_task6.csproj -c Release -o /app/publish /p:UseAppHost=false
 
 # Step 2: Lightweight Runtime Container
