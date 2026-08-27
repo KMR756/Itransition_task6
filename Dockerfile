@@ -1,39 +1,47 @@
-# Step 1: Build .NET App + Tailwind CSS
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+# Multi-stage build for .NET Core + Node.js
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Install Node.js for Tailwind CLI
-RUN apt-get update && apt-get install -y curl gnupg && \
-    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
-    apt-get install -y nodejs && \
-    rm -rf /var/lib/apt/lists/*
+# Copy csproj and restore dependencies
+COPY ["Itransition_task6/Itransition_task6.csproj", "Itransition_task6/"]
+RUN dotnet restore "Itransition_task6/Itransition_task6.csproj"
 
-# Restore NPM packages from root directory
+# Copy everything else and build
+COPY Itransition_task6/ Itransition_task6/
+WORKDIR "/src/Itransition_task6"
+
+# Install Node.js and npm (for client-side dependencies)
+RUN apt-get update && apt-get install -y \
+    curl \
+    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install npm dependencies (if package.json exists)
 COPY package*.json ./
-RUN npm ci
+RUN if [ -f "package.json" ]; then npm ci || npm install; fi
 
-# Restore .NET packages
-COPY Itransition_task6/Itransition_task6.csproj Itransition_task6/
-RUN dotnet restore Itransition_task6/Itransition_task6.csproj
+# Build the .NET application
+RUN dotnet build "Itransition_task6.csproj" -c Release -o /app/build
 
-# Copy remaining source code
-COPY . .
+# Publish the application
+FROM build AS publish
+RUN dotnet publish "Itransition_task6.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
-# Compile Tailwind CSS output into wwwroot
-RUN npx @tailwindcss/cli -i ./Itransition_task6/wwwroot/css/site.css -o ./Itransition_task6/wwwroot/css/app.css
-
-# Publish compiled ASP.NET Core binaries
-WORKDIR /src/Itransition_task6
-RUN dotnet publish Itransition_task6.csproj -c Release -o /app/publish /p:UseAppHost=false
-
-# Step 2: Lightweight Runtime Container
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
+# Final runtime image
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
-COPY --from=build /app/publish .
 
-# Fix for Render inotify limits & bind port
-ENV DOTNET_USE_POLLING_FILE_WATCHER=true
+# Copy published files
+COPY --from=publish /app/publish .
+
+# Copy node_modules if they exist
+COPY --from=build /src/Itransition_task6/node_modules ./node_modules 2>/dev/null || true
+
+# Set environment variable
+ENV ASPNETCORE_ENVIRONMENT=Production
 ENV ASPNETCORE_URLS=http://+:8080
+
 EXPOSE 8080
 
 ENTRYPOINT ["dotnet", "Itransition_task6.dll"]
